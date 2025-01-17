@@ -1,0 +1,32 @@
+# Node.js
+app/node_modules/
+app/npm-debug.log
+app/yarn-debug.log
+app/yarn-error.log
+
+# Archivos generados por TypeScript
+app/dist/
+app/*.tsbuildinfo
+
+# Archivos de configuración de la aplicación
+app/.env
+app/.env.*
+
+# Certificados y claves privadas (importante para la seguridad)
+certbot/conf/
+certbot/www/
+
+# Archivos generados por Docker
+*.log
+docker-compose.override.yml
+
+# Archivos temporales de editores
+.vscode/
+.idea/
+
+# Archivos de sistema
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
+# Archivos específicos de contenedores
+docker-compose.yml

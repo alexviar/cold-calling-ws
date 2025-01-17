@@ -1,0 +1,6 @@
+docker-compose.yml
+certbot/
+nginx/
+
+app/node_modules
+app/dist
