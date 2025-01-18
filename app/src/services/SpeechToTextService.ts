@@ -43,13 +43,13 @@ export function createSpeechToTextPendingRequest() {
         data += chunk;
       });
       res.on('end', () => {
-        if (res.statusCode !== 200) resolve('')
+        if (res.statusCode !== 200) reject(res.statusMessage)
         try {
 
           resolve(JSON.parse(data).DisplayText);
         }
-        catch (e) {
-          console.log('Error en la transcripción', e);
+        catch (e: any) {
+          console.log('Error en la transcripción', e.message);
           resolve('');
         }
       });
