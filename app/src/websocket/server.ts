@@ -27,7 +27,7 @@ function websocketServer(server: HTTPServer): void {
 
     // Escucha mensajes del cliente
     ws.on('message', (message: string) => {
-      // console.log("Message receibed", String(message))
+      console.log("Message receibed", String(message))
 
       const event = JSON.parse(message);
       if (event.event == 'media') {

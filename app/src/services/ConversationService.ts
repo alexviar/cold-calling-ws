@@ -33,14 +33,19 @@ export class ConversationService {
   private _prepareSpeechToSpeechPipe() {
     const speechToTextService = new SpeechToTextService(async (transcript) => {
       try {
-        // console.log("Speech to text", transcript)
+        console.log("Speech to text", transcript)
         if (transcript === '') return
-
+        let startsAt
+        startsAt = Date.now()
         const textResponse = await this.genAiService.generateResponse(transcript)
-        // console.log("Text response", textResponse)
+        console.log("Text response", textResponse, "Duration", (Date.now() - startsAt) / 1000)
+
+        startsAt = Date.now()
         const textToSpeechService = new TextToSpeechService()
         const speechResponse = await textToSpeechService.send(textResponse)
-        // console.log("Text to speech", speechResponse)
+        const filename = generarCadenaAleatoria(40) + '.mp3';
+        console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
+        fs.writeFile('data/' + filename, speechResponse, () => { })
 
         this.responseHandler(speechResponse)
       }
@@ -49,12 +54,15 @@ export class ConversationService {
       }
     })
 
+    const userInputFilename = generarCadenaAleatoria(40) + '.wav'
     return new MediaStreamConverter(
       (data) => {
         speechToTextService.write(data)
+        fs.appendFileSync('data/' + userInputFilename, data)
       },
       () => {
         speechToTextService.end()
+        console.log("Client says", userInputFilename)
       }
     )
   }

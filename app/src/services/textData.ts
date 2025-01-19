@@ -1,99 +1,103 @@
 export const textData = `
-Guía para Agentes de Call Center - GlowNaturals
+Estimado  socio de plaza del vestido, muy buen día:
 
-1. Introducción a GlowNaturals
+Espero que este mensaje lo encuentre excelente. Me permito tomar unos minutos de su valioso tiempo porque tengo el gran placer de invitarlo a formar parte de un movimiento trascendental, pensado para beneficiar directamente a usted, a su negocio, y a todo lo que representa como parte importante de la Plaza del Vestido.
 
-Misión: Brindar productos de cuidado de la piel sostenibles, de alta calidad y hechos con ingredientes naturales, comprometidos con el bienestar del cliente y el medio ambiente.
+Esta iniciativa no es un proyecto común: se trata de una estrategia revolucionaria que tiene como objetivo conectar a su espacio comercial con una cartera sólida de más de 10 millones de clientes potenciales, personas interesadas en adquirir los productos que usted o sus inquilinos ofrecen. Sabemos que hoy en día, atraer más clientes no solo depende del local físico, sino también de herramientas innovadoras y el aprovechamiento estratégico del comercio en línea.
 
-Valores clave:
+Aquí es donde radica la gran oportunidad: nuestro proyecto está diseñado para garantizar que estos clientes potenciales lleguen a usted o a los comercios que integran sus espacios, ya sea para incrementar la venta en físico o a través de nuevas oportunidades en las plataformas digitales. Y lo mejor de todo es que este no es un plan temporal, sino una estrategia continua pensada para maximizar resultados día tras día, asegurando la afluencia de nuevos prospectos constantemente.
 
-Sostenibilidad: Envases reciclables y procesos ecoamigables.
-Calidad natural: Ingredientes orgánicos y libres de químicos agresivos.
-Compromiso con el cliente: Garantía de satisfacción y soporte personalizado.
-2. Línea de Productos
-Productos Destacados
+¿Cómo funciona este movimiento?
 
-Crema Hidratante GlowHydra
+1. Redirección personalizada: Cada cliente que forme parte de nuestra red será canalizado hacia los negocios y locales que realmente puedan ofrecerles lo que buscan, haciendo que el tráfico sea más efectivo para generar compras reales.
 
-Ingredientes: Ácido hialurónico, aloe vera, aceite de jojoba.
-Beneficios: Hidratación profunda, mejora la elasticidad y reduce las líneas finas.
-Precio: $29.99 USD.
 
-Sérum Antioxidante RadianceBoost
+2. Ventas en línea como oportunidad adicional: Además de impulsar la venta directa en los espacios de la plaza, se habilitarán estrategias enfocadas en ventas online, facilitando que su negocio (o los de sus inquilinos) amplíe horizontes al mercado digital, conectándose con clientes de cualquier lugar, en cualquier momento.
 
-Ingredientes: Vitamina C, extracto de té verde, niacinamida.
-Beneficios: Ilumina el rostro, reduce manchas y combate el envejecimiento prematuro.
-Precio: $39.99 USD.
 
-Exfoliante Suave RenewScrub
+3. Incremento en visibilidad y alcance: Gracias a esta colaboración, logrará una presencia reforzada en el mercado, beneficiando tanto a socios como a los comercios ubicados en el centro comercial, creando un entorno de ganancia mutua.
 
-Ingredientes: Semillas de albaricoque, manteca de karité, aceite de almendras.
-Beneficios: Elimina células muertas, suaviza la piel y promueve la regeneración celular.
-Precio: $24.99 USD.
-Promociones Actuales
-20% de descuento en la primera compra con el código WELCOME20.
-Programa de referidos: El cliente y su referido obtienen $10 de descuento en su próxima compra.
-3. Políticas de Envío y Devoluciones
-Envío:
-Envíos gratuitos en compras mayores a $50 USD.
-Tiempo estimado de entrega: 3-7 días hábiles.
-Seguimiento de pedidos disponible en el portal del cliente.
-Devoluciones:
-Período de devolución: 30 días desde la fecha de compra.
-Condiciones: El producto debe estar sin usar y en su empaque original.
-Proceso: Contactar al soporte para obtener una etiqueta de devolución gratuita.
-4. Preguntas Frecuentes
-Sobre los Productos:
 
-¿Los productos son aptos para piel sensible?
-Sí, todos los productos están dermatológicamente probados y son libres de fragancias artificiales y parabenos.
 
-¿Son veganos y cruelty-free?
-Sí, todos nuestros productos son veganos y nunca se prueban en animales.
+¿Por qué participar?
 
-Sobre las Promociones:
+Beneficios directos y tangibles: Esta estrategia no solo está diseñada para atraer clientes, sino para generar un impacto real y mensurable en las ventas de todos los participantes. Usted tendrá acceso a clientes listos para comprar, interesados en lo que sus espacios comerciales tienen para ofrecer.
 
-¿Cómo funciona el descuento del 20%?
-Aplica el código WELCOME20 al finalizar tu compra para obtener el descuento.
+Acción sostenida: Este movimiento no es algo pasajero o limitado a ciertas fechas del calendario. Es un modelo pensado para mantener resultados a lo largo de todo el año, incrementando la estabilidad y el éxito comercial.
 
-¿Cómo invito a un amigo al programa de referidos?
-Comparte tu enlace único desde tu cuenta. Cuando tu amigo realice su primera compra, ambos recibirán $10 de descuento.
+Sin complicaciones: Nos encargaremos de toda la logística y optimización, de modo que los beneficios lleguen directamente a quienes participen, sin necesidad de invertir tiempo adicional de su parte.
 
-Sobre el Envío:
 
-¿Cuánto cuesta el envío si no alcanzo los $50?
-La tarifa fija de envío es de $5.99 USD.
+Siguiente paso: Queremos enviarle más información.
 
-¿Puedo cambiar la dirección de envío después de realizar el pedido?
-Sí, contacta al soporte dentro de las primeras 24 horas.
+Para darle detalles personalizados, quisiera confirmar si podemos contactarle por WhatsApp. De esta forma, podremos enviarle todo lo que necesita saber sobre este movimiento y cómo puede integrarse sin complicaciones. Queremos asegurarnos de que usted tenga todo claro, para que pueda sumarse a esta oportunidad única que puede marcar una gran diferencia para su negocio.
 
-5. Manejo de Objeciones
-Objeción 1: "Los productos son caros."
+Estoy completamente disponible para resolver sus dudas, conversar más sobre el proyecto, o compartirle ejemplos específicos sobre cómo esta estrategia ha sido diseñada para maximizar el beneficio de cada participante. Estoy convencido de que esta colaboración podrá abrir nuevas y grandes oportunidades para todos en la Plaza del Vestido, y me sentiría honrado de contar con su valiosa participación.
 
-Respuesta sugerida: “Entiendo tu preocupación. Nuestros productos están formulados con ingredientes de alta calidad y resultados comprobados. Además, con el descuento del 20% en tu primera compra, puedes probarlos a un precio más accesible.”
+Sin más por el momento, le agradezco mucho por su tiempo y quedo atento a su amable respuesta.
 
-Objeción 2: "No estoy seguro de qué producto elegir."
+Atentamente,
+Óscar Olvera
+`
 
-Respuesta sugerida: “Con gusto te puedo ayudar. ¿Qué preocupaciones tienes sobre tu piel? Basándonos en tus necesidades, puedo recomendarte el producto ideal.”
+export const systemInstruction = `
+Objetivo: Actuar como un operador de call center experto en atención a socios de la Plaza del Vestido, con el propósito de informarles sobre un movimiento estratégico que atraerá más clientes a sus locales. La IA debe manejar las interacciones de manera persuasiva, clara y amigable, respondiendo preguntas y ofreciendo detalles sobre los beneficios de colaborar.
 
-6. Contacto con Soporte Especializado
+Se breve y conciso en tus respuestas. Optimiza tus respuestas para un sisntetizador de voz. Toma en cuenta que si tus respuestas fueran habladas, no deberias tardar mas de 15 segundos en decir todo lo que tengas que decir.
+---
 
-Si no puedes resolver la duda de un cliente, utiliza el siguiente mensaje:
-“Para garantizar que recibas la mejor información, transferiré tu consulta a nuestro equipo especializado. ¿Puedo ayudarte con algo más mientras tanto?”
+Tono y Enfoque:
 
-Correo: support@glownaturals.com
-Teléfono: +1 (800) 555-0199
-Horario: Lunes a viernes, 9:00 AM - 6:00 PM (hora local).
-7. Scripts Sugeridos
-Llamada Inicial:
+Tono: Amigable, profesional y persuasivo.
 
-“Hola, soy [Tu Nombre] de GlowNaturals. ¡Gracias por contactarnos! Estamos emocionados de ayudarte a encontrar los mejores productos para tu piel. ¿Puedo contarte sobre nuestras promociones actuales?”
+Lenguaje: Claro y adaptable según el socio (formal, directo y positivo).
 
-Promoción del 20%:
 
-“Quiero compartirte que puedes obtener un 20% de descuento en tu primera compra usando el código WELCOME20. Es una gran oportunidad para probar nuestros productos estrella.”
 
-Cierre de Venta:
+---
 
-“¡Gracias por tu interés! Te recuerdo que con tu compra de hoy puedes disfrutar de [mencionar beneficio]. ¿Te gustaría completar tu pedido ahora?”
+Funciones Principales de la IA:
+
+1. Captación de atención:
+Inicia con una introducción clara:
+“Buenos días/tardes, soy parte del equipo que está trabajando para impulsar las ventas y atraer más clientes hacia la Plaza del Vestido. ¿Tiene unos minutos para escuchar cómo podemos colaborar?”
+
+
+2. Comunicación de Beneficios Clave:
+
+Explique cómo los clientes potenciales (más de 10 millones) serán dirigidos hacia sus locales.
+
+Enfatice que la colaboración no implica costo adicional.
+
+Mencione el soporte continuo que se brindará a través de WhatsApp.
+Ejemplo:
+“Estamos lanzando una estrategia para que sus locales reciban un flujo constante de clientes interesados en sus productos. Todo es gestionado mediante WhatsApp, y nuestros datos indican que esto podría incrementar notablemente su visibilidad.”
+
+
+
+3. Resolución de dudas comunes:
+Responda preguntas como:
+
+¿Cómo llegará la información a mis clientes?
+“Les haremos llegar promociones personalizadas y contactos directamente mediante herramientas digitales avanzadas.”
+
+¿Qué necesito hacer para participar?
+“Solo necesitamos confirmar algunos detalles para incluirlo en nuestra estrategia y mantenernos en contacto.”
+
+
+
+4. Gestión de objeciones:
+Si el socio muestra dudas o se muestra reticente:
+
+Use frases como:
+“Entiendo su preocupación. Permítame asegurarle que toda la información es gestionada con transparencia y que buscamos únicamente beneficiar a los arrendatarios.”
+
+Ofrezca la posibilidad de recibir información detallada por otro medio:
+“Si lo prefiere, puedo enviarle los detalles por WhatsApp o correo para que lo revise con calma.”
+
+
+
+5. Cierre de llamada:
+Finalice asegurando seguimiento:
+“Gracias por su tiempo. En breve, recibirá más información y estaremos en contacto. Estoy seguro de que este movimiento será una gran oportunidad para usted.”
 `
