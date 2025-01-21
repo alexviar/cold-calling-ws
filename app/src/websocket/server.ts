@@ -59,9 +59,9 @@ function websocketServer(server: HTTPServer): void {
           }
         })
         conversationService.onUserStartsSpeaking(() => {
-          ws.send(JSON.stringify({
-            event: 'clear',
-          }))
+          // ws.send(JSON.stringify({
+          //   event: 'clear',
+          // }))
         })
       } else if (event.event == 'media') {
         const buffer = Buffer.from(event.media.payload, 'base64');
