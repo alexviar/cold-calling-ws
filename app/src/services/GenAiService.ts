@@ -56,6 +56,7 @@ export class GenAiService {
           const response = JSON.parse(data);
           const content = response.candidates[0].content;
           this.history.push(content);
+          this.initialize()
           resolve(content.parts[0].text);
         });
       });
@@ -102,7 +103,6 @@ export class GenAiService {
   generateResponse(text: string): Promise<string> {
     this.finalizeRequest(text);
     const pendingRequest = this.pendingRequest
-    this.initialize()
     return pendingRequest
   }
 }

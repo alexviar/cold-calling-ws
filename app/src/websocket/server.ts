@@ -20,6 +20,12 @@ function websocketServer(server: HTTPServer): void {
         }
       }))
     })
+    conversationService.onUserStartsSpeaking(() => {
+      // ws.send(JSON.stringify({
+      //   event: 'clear',
+      // }))
+    })
+    conversationService.text("hola, ¿Con quién hablo?")
 
     ws.on('open', () => {
       console.log('Conection open')
@@ -30,7 +36,9 @@ function websocketServer(server: HTTPServer): void {
       console.log("Message receibed", String(message))
 
       const event = JSON.parse(message);
-      if (event.event == 'media') {
+      if (event.event == 'start') {
+        // conversationService.text("hola, ¿Con quién hablo?")
+      } else if (event.event == 'media') {
         const buffer = Buffer.from(event.media.payload, 'base64');
         if (buffer.length !== 20) {
           console.log('Media payload length is not 20')
