@@ -1,10 +1,9 @@
 import { Server as HTTPServer, IncomingMessage } from 'http';
+import fs from 'fs'
 import { parse } from 'url';
 import WebSocket, { WebSocketServer } from 'ws';
 import { ConversationService } from '../services/ConversationService';
-
-const fs = require('fs')
-
+import path from 'path';
 
 function websocketServer(server: HTTPServer): void {
   const wss = new WebSocketServer({ server });
@@ -21,11 +20,25 @@ function websocketServer(server: HTTPServer): void {
       }))
     })
     conversationService.onUserStartsSpeaking(() => {
-      // ws.send(JSON.stringify({
-      //   event: 'clear',
-      // }))
+      ws.send(JSON.stringify({
+        event: 'clear',
+      }))
     })
-    conversationService.text("hola, ¿Con quién hablo?")
+
+    try {
+      const greetingsPath = path.join(__dirname, '..', 'assets', 'greetings.mp3');
+      const greetings = fs.readFileSync(greetingsPath, { encoding: 'base64' });
+      ws.send(JSON.stringify({
+        event: 'media',
+        media: {
+          payload: greetings
+        }
+      }));
+    } catch (error) {
+      console.error('Error loading greetings.mp3:', error);
+      console.log('Attempted path:', path.join(__dirname, '..', 'assets', 'greetings.mp3'));
+    }
+    // conversationService.text("hola, ¿Con quién hablo?")
 
     ws.on('open', () => {
       console.log('Conection open')
