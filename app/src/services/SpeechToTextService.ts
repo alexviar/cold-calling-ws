@@ -59,12 +59,12 @@ export class SpeechToTextService {
 
   write(data: Buffer) {
     this.fileAppender.append(data)
-    this.pendingRequest.write(data)
+    // this.pendingRequest.write(data)
   }
 
   end() {
     console.log("Client says", this.userInputFilename)
-    this.pendingRequest.end()
+    // this.pendingRequest.end()
   }
 }
 
