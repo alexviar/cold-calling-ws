@@ -1,61 +1,77 @@
 interface VADState {
   energyHistory: number[];
   noiseFloor: number;
-  silenceCounter: number;
-  lastEnergy: number;
+  voiceDuration: number; // Tiempo acumulado de voz en segundos
+  silenceDuration: number; // Tiempo acumulado de silencio en segundos
+  isSpeaking: boolean; // Estado actual de voz detectada
 }
 
 export class VADProcessor {
-  private readonly HISTORY_SIZE = 50;
-  private readonly SILENCE_THRESHOLD = 0.3;
-  private readonly VOICE_THRESHOLD = 0.6;
-  private readonly MIN_VOICE_DURATION = 0.2; // seconds
-  private readonly SILENCE_DURATION = 0.5; // seconds
+  private readonly HISTORY_SIZE = 50; // Número de muestras para el historial de energía
+  private readonly NOISE_ADAPT_RATE = 0.1; // Tasa de adaptación del piso de ruido
+  private readonly SILENCE_THRESHOLD = 1.5; // Umbral para silencio relativo al piso de ruido
+  private readonly VOICE_THRESHOLD = 3.0; // Umbral para voz relativo al piso de ruido
+  private readonly MIN_VOICE_DURATION = 0.3; // Duración mínima para confirmar voz (segundos)
+  private readonly MAX_SILENCE_DURATION = 0.5; // Duración máxima de silencio antes de detener la voz (segundos)
+
   private state: VADState = {
     energyHistory: [],
-    noiseFloor: 0,
-    silenceCounter: 0,
-    lastEnergy: 0
+    noiseFloor: 0.01, // Piso de ruido inicial
+    voiceDuration: 0,
+    silenceDuration: 0,
+    isSpeaking: false,
   };
 
+  /**
+   * Procesa un segmento de audio para determinar si hay actividad de voz.
+   * @param pcmData - Datos PCM del audio como Int16Array
+   * @param sampleRate - Frecuencia de muestreo del audio (Hz)
+   * @returns True si se detecta voz, False en caso contrario
+   */
   processAudio(pcmData: Int16Array, sampleRate: number): boolean {
-    // Calculate RMS energy
+    // Paso 1: Calcular energía RMS
     const energy = Math.sqrt(
-      pcmData.reduce((sum, sample) => sum + Math.pow(sample, 2), 0) / pcmData.length
+      pcmData.reduce((sum, sample) => sum + sample ** 2, 0) / pcmData.length
     );
 
-    // Update energy history
+    // Paso 2: Actualizar historial de energía
     this.state.energyHistory.push(energy);
     if (this.state.energyHistory.length > this.HISTORY_SIZE) {
       this.state.energyHistory.shift();
     }
 
-    // Calculate noise floor (using lowest 10% of energies)
+    // Paso 3: Estimar piso de ruido adaptativo
     const sortedEnergies = [...this.state.energyHistory].sort((a, b) => a - b);
-    this.state.noiseFloor = sortedEnergies[Math.floor(sortedEnergies.length * 0.1)];
+    const newNoiseFloor = sortedEnergies[Math.floor(sortedEnergies.length * 0.1)];
+    this.state.noiseFloor =
+      this.state.noiseFloor * (1 - this.NOISE_ADAPT_RATE) + newNoiseFloor * this.NOISE_ADAPT_RATE;
 
-    // Normalize energy relative to noise floor
+    // Paso 4: Normalizar energía
     const normalizedEnergy = energy / (this.state.noiseFloor + 1e-6);
 
-    // Apply smoothing
-    const smoothedEnergy = 0.7 * this.state.lastEnergy + 0.3 * normalizedEnergy;
-    this.state.lastEnergy = smoothedEnergy;
-
-    let isSpeaking = false;
-
-    if (smoothedEnergy > this.VOICE_THRESHOLD) {
-      this.state.silenceCounter = 0;
-      isSpeaking = true;
-    } else if (smoothedEnergy < this.SILENCE_THRESHOLD) {
-      this.state.silenceCounter += pcmData.length / sampleRate;
-      isSpeaking = this.state.silenceCounter < this.SILENCE_DURATION;
-    } else {
-      // Hysteresis zone - maintain previous state
-      isSpeaking = this.state.silenceCounter < this.SILENCE_DURATION;
+    // Paso 5: Determinar actividad de voz
+    const frameDuration = pcmData.length / sampleRate; // Duración del frame en segundos
+    if (normalizedEnergy > this.VOICE_THRESHOLD) {
+      this.state.voiceDuration += frameDuration;
+      this.state.silenceDuration = 0;
+      if (this.state.voiceDuration >= this.MIN_VOICE_DURATION) {
+        this.state.isSpeaking = true;
+      }
+    } else if (normalizedEnergy < this.SILENCE_THRESHOLD) {
+      this.state.silenceDuration += frameDuration;
+      if (this.state.silenceDuration >= this.MAX_SILENCE_DURATION) {
+        this.state.isSpeaking = false;
+        this.state.voiceDuration = 0;
+      }
     }
 
-    // console.log("Energy", smoothedEnergy, this.state.silenceCounter, isSpeaking);
+    // Debugging opcional
+    // console.log(
+    //   `Energy: ${energy.toFixed(4)}, Normalized: ${normalizedEnergy.toFixed(2)}, ` +
+    //   `Noise Floor: ${this.state.noiseFloor.toFixed(4)}, Voice: ${this.state.isSpeaking}, ` +
+    //   `Voice Duration: ${this.state.voiceDuration.toFixed(2)}, Silence Duration: ${this.state.silenceDuration.toFixed(2)}`
+    // );
 
-    return isSpeaking;
+    return this.state.isSpeaking;
   }
 }

@@ -1,6 +1,6 @@
 import fs from "fs";
 import { GenAiService } from "./GenAiService";
-import { MediaStreamConverter } from "./MediaStreamConverter";
+import { AudioCodec, MediaStreamConverter } from "./MediaStreamConverter";
 import { SpeechToTextService } from "./SpeechToTextService";
 import { TextToSpeechService } from "./TextToSpeechService";
 import { VADProcessor } from "./VADProcessor";
@@ -31,7 +31,7 @@ export class ConversationService {
   private voiceBuffer: VoiceBuffer | null = null;
   private readonly MIN_VOICE_DURATION = 500; // milliseconds
 
-  constructor(onResponse: (response: Buffer) => void) {
+  constructor({ onResponse, mediaFormat }: { mediaFormat: { numChannels: number, encoding: AudioCodec, sampleRate: number }, onResponse: (response: Buffer) => void }) {
     this.responseHandler = onResponse
     // fs.writeFile('data/output.wav', this.mediaStreamConverter.generateWavHeader(), () => { });
     this.genAiService = new GenAiService()
@@ -41,8 +41,11 @@ export class ConversationService {
     // let fileAppender = new FileAppender('data/' + userInputFilename);
     let stsPipe = this._prepareSpeechToSpeechPipe()
 
-    this.mediaStreamConverter = new MediaStreamConverter(
-      (data) => {
+    this.mediaStreamConverter = new MediaStreamConverter({
+      mediaFormat,
+      onData: (data) => {
+        // fileAppender.append(data);
+        // return
         const pcmData = new Int16Array(data.buffer);
         const isSpeaking = this.vadProcessor.processAudio(pcmData, 8000);
         const chunkDuration = (data.buffer.byteLength / 16); // ms
@@ -87,10 +90,10 @@ export class ConversationService {
           this.voiceBuffer = null;
         }
       },
-      () => {
+      onClose: () => {
         // console.log("Client says", userInputFilename)
       }
-    )
+    })
 
     // fileAppender.append(this.mediaStreamConverter.generateWavHeader());
 

@@ -1,14 +1,23 @@
 import { spawn } from 'child_process';
 
+export type AudioCodec = 'g729' | 'g722' | 'mulaw' | 'alaw';
+
 export class MediaStreamConverter {
   protected ffmepgProcess
 
-  constructor(onData: (data: Buffer) => void, onClose: () => void) {
+  constructor({ onData, onClose, mediaFormat }: {
+    onData: (data: Buffer) => void,
+    onClose: () => void,
+    mediaFormat: { encoding: AudioCodec, sampleRate: number, numChannels: number }
+  }) {
+    console.log(mediaFormat)
     const ffmpeg = spawn('ffmpeg', [
-      '-f', 'g729', // Formato de entrada
+      '-f', mediaFormat.encoding, // Formato de entrada
+      '-ar', String(mediaFormat.sampleRate), // Frecuencia de muestreo de entrada
+      '-ac', String(mediaFormat.numChannels), // Mono
       '-i', 'pipe:0', // Leer desde stdin
-      '-ar', '8000', // Frecuencia de muestreo de salida
-      '-ac', '1', // Mono
+      '-ar', String(mediaFormat.sampleRate), // Frecuencia de muestreo de salida
+      '-ac', String(mediaFormat.numChannels), // Mono
       '-f', 's16le', //Formato PCM sin firmar
 
       //silent mode
