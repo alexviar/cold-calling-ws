@@ -9,11 +9,12 @@ interface VADState {
 export class VADProcessor {
   private readonly HISTORY_SIZE = 50; // Número de muestras para el historial de energía
   private readonly NOISE_ADAPT_RATE = 0.1; // Tasa de adaptación del piso de ruido
-  private readonly SILENCE_THRESHOLD = 1.5; // Umbral para silencio relativo al piso de ruido
-  private readonly VOICE_THRESHOLD = 3.0; // Umbral para voz relativo al piso de ruido
-  private readonly MIN_VOICE_DURATION = 0.3; // Duración mínima para confirmar voz (segundos)
-  private readonly MAX_SILENCE_DURATION = 0.5; // Duración máxima de silencio antes de detener la voz (segundos)
+  private readonly SILENCE_THRESHOLD = 150; // Umbral para silencio relativo al piso de ruido
+  private readonly VOICE_THRESHOLD = 300; // Umbral para voz relativo al piso de ruido
+  private readonly MIN_VOICE_DURATION = 0.2; // Duración mínima para confirmar voz (segundos)
+  private readonly MAX_SILENCE_DURATION = 0.75; // Duración máxima de silencio antes de detener la voz (segundos)
 
+  private timestamp = 0
   private state: VADState = {
     energyHistory: [],
     noiseFloor: 0.01, // Piso de ruido inicial
@@ -40,24 +41,25 @@ export class VADProcessor {
       this.state.energyHistory.shift();
     }
 
-    // Paso 3: Estimar piso de ruido adaptativo
-    const sortedEnergies = [...this.state.energyHistory].sort((a, b) => a - b);
-    const newNoiseFloor = sortedEnergies[Math.floor(sortedEnergies.length * 0.1)];
-    this.state.noiseFloor =
-      this.state.noiseFloor * (1 - this.NOISE_ADAPT_RATE) + newNoiseFloor * this.NOISE_ADAPT_RATE;
+    // // Paso 3: Estimar piso de ruido adaptativo
+    // const sortedEnergies = [...this.state.energyHistory].sort((a, b) => a - b);
+    // const newNoiseFloor = sortedEnergies[Math.floor(sortedEnergies.length * 0.1)];
+    // this.state.noiseFloor =
+    //   this.state.noiseFloor * (1 - this.NOISE_ADAPT_RATE) + newNoiseFloor * this.NOISE_ADAPT_RATE;
 
-    // Paso 4: Normalizar energía
-    const normalizedEnergy = energy / (this.state.noiseFloor + 1e-6);
+    // // Paso 4: Normalizar energía
+    // const normalizedEnergy = energy / (this.state.noiseFloor + 1e-6);
 
     // Paso 5: Determinar actividad de voz
     const frameDuration = pcmData.length / sampleRate; // Duración del frame en segundos
-    if (normalizedEnergy > this.VOICE_THRESHOLD) {
+    this.timestamp += frameDuration
+    if (energy > this.VOICE_THRESHOLD) {
       this.state.voiceDuration += frameDuration;
       this.state.silenceDuration = 0;
       if (this.state.voiceDuration >= this.MIN_VOICE_DURATION) {
         this.state.isSpeaking = true;
       }
-    } else if (normalizedEnergy < this.SILENCE_THRESHOLD) {
+    } else if (energy < this.SILENCE_THRESHOLD) {
       this.state.silenceDuration += frameDuration;
       if (this.state.silenceDuration >= this.MAX_SILENCE_DURATION) {
         this.state.isSpeaking = false;
@@ -66,11 +68,12 @@ export class VADProcessor {
     }
 
     // Debugging opcional
-    // console.log(
-    //   `Energy: ${energy.toFixed(4)}, Normalized: ${normalizedEnergy.toFixed(2)}, ` +
-    //   `Noise Floor: ${this.state.noiseFloor.toFixed(4)}, Voice: ${this.state.isSpeaking}, ` +
-    //   `Voice Duration: ${this.state.voiceDuration.toFixed(2)}, Silence Duration: ${this.state.silenceDuration.toFixed(2)}`
-    // );
+    console.log(
+      `Timestamp: ${this.timestamp.toFixed(2)}, ` +
+      `Energy: ${energy.toFixed(4)}, ` +
+      `Noise Floor: ${this.state.noiseFloor.toFixed(4)}, Voice: ${this.state.isSpeaking}, ` +
+      `Voice Duration: ${this.state.voiceDuration.toFixed(2)}, Silence Duration: ${this.state.silenceDuration.toFixed(2)}`
+    );
 
     return this.state.isSpeaking;
   }
