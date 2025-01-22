@@ -6,7 +6,7 @@ import { TextToSpeechService } from "./TextToSpeechService";
 import { VADProcessor } from "./VADProcessor";
 import { FileAppender } from "../utils/FileAppender";
 
-function generarCadenaAleatoria(longitud = 10) {
+export function generarCadenaAleatoria(longitud = 10) {
   const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let resultado = '';
   for (let i = 0; i < longitud; i++) {
@@ -17,7 +17,7 @@ function generarCadenaAleatoria(longitud = 10) {
 }
 
 interface VoiceBuffer {
-  chunks: Buffer[];
+  chunks: Buffer;
   totalDuration: number;
 }
 
@@ -48,46 +48,56 @@ export class ConversationService {
         // return
         const pcmData = new Int16Array(data.buffer);
         const isSpeaking = this.vadProcessor.processAudio(pcmData, 8000);
-        const chunkDuration = (data.buffer.byteLength / 16); // ms
 
         if (isSpeaking) {
-          if (!this.voiceBuffer) {
-            this.voiceBuffer = {
-              chunks: [],
-              totalDuration: 0
-            };
-          }
 
-          this.voiceBuffer.chunks.push(data);
-          this.voiceBuffer.totalDuration += chunkDuration;
+          this.startSpeakingHandler?.()
 
           // If we pass threshold, process buffered chunks
-          if (!this.userIsSpeaking && this.voiceBuffer.totalDuration >= this.MIN_VOICE_DURATION) {
+          if (!this.userIsSpeaking) {
             this.userIsSpeaking = true;
-            this.startSpeakingHandler?.()
             // Process buffered chunks
-            const mergedChunks = Buffer.concat(this.voiceBuffer.chunks);
+            const mergedChunks = Buffer.concat([
+              this.voiceBuffer?.chunks ?? Buffer.alloc(0),
+              data
+            ]);
+            // Discard buffer if voice stopped before threshold
+            this.voiceBuffer = null;
+
             stsPipe.write(mergedChunks)
             // fileAppender.append(mergedChunks);
-          } else if (this.userIsSpeaking) {
+          } else {
             // Already validated voice, process directly
             stsPipe.write(data);
             // fileAppender.append(data);
           }
-        } else if (this.userIsSpeaking) {
-          this.userIsSpeaking = false;
-          this.voiceBuffer = null;
-          stsPipe.end()
-          stsPipe = this._prepareSpeechToSpeechPipe();
 
-          // userInputFilename = generarCadenaAleatoria(40) + '.wav'
-          // fileAppender = new FileAppender('data/' + userInputFilename);
-          // fileAppender.append(this.mediaStreamConverter.generateWavHeader());
-          // this.mediaStreamConverter.end();
-          // this.mediaStreamConverter = this._prepareSpeechToSpeechPipe();
         } else {
-          // Discard buffer if voice stopped before threshold
-          this.voiceBuffer = null;
+          if (!this.voiceBuffer) {
+            this.voiceBuffer = {
+              chunks: Buffer.alloc(0),
+              totalDuration: 0
+            };
+          }
+
+          this.voiceBuffer.chunks = Buffer.concat([this.voiceBuffer.chunks, data]);
+          const voiceBufferLength = this.voiceBuffer.chunks.length / 16 // ms
+          if (voiceBufferLength > 500) {
+            this.voiceBuffer.chunks = this.voiceBuffer.chunks.subarray(this.voiceBuffer.chunks.length - 500 * 16)
+          }
+
+          if (this.userIsSpeaking) {
+            this.userIsSpeaking = false;
+            this.voiceBuffer = null;
+            stsPipe.end()
+            stsPipe = this._prepareSpeechToSpeechPipe();
+
+            // userInputFilename = generarCadenaAleatoria(40) + '.wav'
+            // fileAppender = new FileAppender('data/' + userInputFilename);
+            // fileAppender.append(this.mediaStreamConverter.generateWavHeader());
+            // this.mediaStreamConverter.end();
+            // this.mediaStreamConverter = this._prepareSpeechToSpeechPipe();
+          }
         }
       },
       onClose: () => {

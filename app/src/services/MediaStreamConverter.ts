@@ -1,4 +1,6 @@
 import { spawn } from 'child_process';
+import { generarCadenaAleatoria } from './ConversationService';
+import { FileAppender } from '../utils/FileAppender';
 
 export type AudioCodec = 'g729' | 'g722' | 'mulaw' | 'alaw';
 
@@ -11,24 +13,36 @@ export class MediaStreamConverter {
     mediaFormat: { encoding: AudioCodec, sampleRate: number, numChannels: number }
   }) {
     console.log(mediaFormat)
-    const ffmpeg = spawn('ffmpeg', [
+    const outputFilename = generarCadenaAleatoria(40) + '.wav'
+    console.log('Output', outputFilename)
+    const fileAppender = new FileAppender('data/' + outputFilename);
+    fileAppender.append(this.generateWavHeader())
+
+    const ffmpegArgs = [
       '-f', mediaFormat.encoding, // Formato de entrada
       '-ar', String(mediaFormat.sampleRate), // Frecuencia de muestreo de entrada
-      '-ac', String(mediaFormat.numChannels), // Mono
-      '-i', 'pipe:0', // Leer desde stdin
+      '-ac', String(mediaFormat.numChannels), // Canales
+      '-i', 'pipe:0',             // Leer desde stdin
       '-ar', String(mediaFormat.sampleRate), // Frecuencia de muestreo de salida
-      '-ac', String(mediaFormat.numChannels), // Mono
-      '-f', 's16le', //Formato PCM sin firmar
+      '-ac', String(mediaFormat.numChannels), // Canales
+      '-f', 's16le',              // Formato PCM sin firmar
+      '-hide_banner',             // Modo silencioso
+      '-loglevel', 'error',       // Nivel de registro
+      'pipe:1',                   // Escribir en stdout
+    ];
 
-      //silent mode
-      '-hide_banner',
-      '-loglevel', 'error',
+    // Ajustar dinámicamente los parámetros según el códec
+    if (mediaFormat.encoding === 'g729') {
+      // G.729 no requiere `-ar` ni `-ac`
+      ffmpegArgs.splice(2, 4); // Elimina `-ar` y `-ac` de la lista
+    }
+    console.log(ffmpegArgs)
 
-      'pipe:1', // Escribir en stdout
-    ]);
+    const ffmpeg = spawn('ffmpeg', ffmpegArgs);
 
     ffmpeg.stdout.on('data', (data) => {
       // Llama al callback con los datos procesados
+      fileAppender.append(data)
       onData(data);
     });
 

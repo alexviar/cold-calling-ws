@@ -64,11 +64,11 @@ function websocketServer(server: HTTPServer): void {
           // }))
         })
       } else if (event.event == 'media') {
-        const buffer = Buffer.from(event.media.payload, 'base64');
-        if (buffer.toString('utf-8') == 'QQA=') {
+        if (event.media.payload == 'QQA=') {
           console.log('Skipping QQA= Media payload')
           return;
         }
+        const buffer = Buffer.from(event.media.payload, 'base64');
         conversationService!.write(buffer, Number(event.media.timestamp));
       }
       else if (event.event == 'stop') {

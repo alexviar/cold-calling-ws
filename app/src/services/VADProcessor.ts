@@ -9,8 +9,8 @@ interface VADState {
 export class VADProcessor {
   private readonly HISTORY_SIZE = 50; // Número de muestras para el historial de energía
   private readonly NOISE_ADAPT_RATE = 0.1; // Tasa de adaptación del piso de ruido
-  private readonly SILENCE_THRESHOLD = 150; // Umbral para silencio relativo al piso de ruido
-  private readonly VOICE_THRESHOLD = 300; // Umbral para voz relativo al piso de ruido
+  private readonly SILENCE_THRESHOLD = 600; // Umbral para silencio relativo al piso de ruido
+  private readonly VOICE_THRESHOLD = 1200; // Umbral para voz relativo al piso de ruido
   private readonly MIN_VOICE_DURATION = 0.2; // Duración mínima para confirmar voz (segundos)
   private readonly MAX_SILENCE_DURATION = 0.75; // Duración máxima de silencio antes de detener la voz (segundos)
 
@@ -68,12 +68,12 @@ export class VADProcessor {
     }
 
     // Debugging opcional
-    console.log(
-      `Timestamp: ${this.timestamp.toFixed(2)}, ` +
-      `Energy: ${energy.toFixed(4)}, ` +
-      `Noise Floor: ${this.state.noiseFloor.toFixed(4)}, Voice: ${this.state.isSpeaking}, ` +
-      `Voice Duration: ${this.state.voiceDuration.toFixed(2)}, Silence Duration: ${this.state.silenceDuration.toFixed(2)}`
-    );
+    // console.log(
+    //   `Timestamp: ${this.timestamp.toFixed(2)}, ` +
+    //   `Energy: ${energy.toFixed(4)}, ` +
+    //   `Noise Floor: ${this.state.noiseFloor.toFixed(4)}, Voice: ${this.state.isSpeaking}, ` +
+    //   `Voice Duration: ${this.state.voiceDuration.toFixed(2)}, Silence Duration: ${this.state.silenceDuration.toFixed(2)}`
+    // );
 
     return this.state.isSpeaking;
   }
