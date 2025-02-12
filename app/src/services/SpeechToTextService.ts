@@ -93,14 +93,14 @@ export function createSpeechToTextPendingRequest() {
       });
       res.on('end', () => {
         if (res.statusCode !== 200) {
-          reject(res.statusMessage);
+          reject("Speech to text error: " + res.statusMessage + "\n" + data);
           return;
         }
         try {
           resolve(JSON.parse(data).DisplayText);
         }
         catch (e: any) {
-          reject(e);
+          reject("Speech to text error: " + e.message);
         }
       });
     });

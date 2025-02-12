@@ -39,7 +39,7 @@ export class ConversationService {
 
     // let userInputFilename = generarCadenaAleatoria(40) + '.wav'
     // let fileAppender = new FileAppender('data/' + userInputFilename);
-    let stsPipe = this._prepareSpeechToSpeechPipe()
+    let stsPipe: SpeechToTextService
 
     this.mediaStreamConverter = new MediaStreamConverter({
       mediaFormat,
@@ -56,21 +56,17 @@ export class ConversationService {
           // If we pass threshold, process buffered chunks
           if (!this.userIsSpeaking) {
             this.userIsSpeaking = true;
+            stsPipe = this._prepareSpeechToSpeechPipe()
             // Process buffered chunks
-            const mergedChunks = Buffer.concat([
+            data = Buffer.concat([
               this.voiceBuffer?.chunks ?? Buffer.alloc(0),
               data
             ]);
             // Discard buffer if voice stopped before threshold
             this.voiceBuffer = null;
-
-            stsPipe.write(mergedChunks)
             // fileAppender.append(mergedChunks);
-          } else {
-            // Already validated voice, process directly
-            stsPipe.write(data);
-            // fileAppender.append(data);
           }
+          stsPipe.write(data);
 
         } else {
           if (!this.voiceBuffer) {
@@ -89,8 +85,7 @@ export class ConversationService {
           if (this.userIsSpeaking) {
             this.userIsSpeaking = false;
             this.voiceBuffer = null;
-            stsPipe.end()
-            stsPipe = this._prepareSpeechToSpeechPipe();
+            stsPipe.end();
 
             // userInputFilename = generarCadenaAleatoria(40) + '.wav'
             // fileAppender = new FileAppender('data/' + userInputFilename);
