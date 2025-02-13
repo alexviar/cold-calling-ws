@@ -1,5 +1,4 @@
 import { spawn } from 'child_process';
-import { generarCadenaAleatoria } from './ConversationService';
 import { FileAppender } from '../utils/FileAppender';
 
 export type AudioCodec = 'g729' | 'g722' | 'mulaw' | 'alaw';
@@ -7,13 +6,14 @@ export type AudioCodec = 'g729' | 'g722' | 'mulaw' | 'alaw';
 export class MediaStreamConverter {
   protected ffmepgProcess
 
-  constructor({ onData, onClose, mediaFormat }: {
+  constructor({ sessionId, onData, onClose, mediaFormat }: {
+    sessionId: string,
     onData: (data: Buffer) => void,
     onClose: () => void,
     mediaFormat: { encoding: AudioCodec, sampleRate: number, numChannels: number }
   }) {
     console.log(mediaFormat)
-    const outputFilename = generarCadenaAleatoria(40) + '.wav'
+    const outputFilename = sessionId + '.wav'
     console.log('Output', outputFilename)
     const fileAppender = new FileAppender('data/' + outputFilename);
     fileAppender.append(this.generateWavHeader())

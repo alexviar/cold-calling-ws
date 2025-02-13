@@ -5,16 +5,9 @@ import { SpeechToTextService } from "./SpeechToTextService";
 import { TextToSpeechService } from "./TextToSpeechService";
 import { VADProcessor } from "./VADProcessor";
 import { FileAppender } from "../utils/FileAppender";
-
-export function generarCadenaAleatoria(longitud = 10) {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let resultado = '';
-  for (let i = 0; i < longitud; i++) {
-    const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
-    resultado += caracteres[indiceAleatorio];
-  }
-  return resultado;
-}
+import Vad from "node-vad";
+import { generateRandomText } from "../utils/generateRandomText";
+import { generateWavHeader } from "../utils/generateWavHeader";
 
 interface VoiceBuffer {
   chunks: Buffer;
@@ -23,139 +16,120 @@ interface VoiceBuffer {
 
 export class ConversationService {
   private mediaStreamConverter: MediaStreamConverter
-  private genAiService: GenAiService
-  private vadProcessor: VADProcessor
   private responseHandler: (response: Buffer) => void
   private startSpeakingHandler!: () => void
-  private userIsSpeaking: boolean = false
-  private voiceBuffer: VoiceBuffer | null = null;
-  private readonly MIN_VOICE_DURATION = 500; // milliseconds
+
 
   constructor({ onResponse, mediaFormat }: { mediaFormat: { numChannels: number, encoding: AudioCodec, sampleRate: number }, onResponse: (response: Buffer) => void }) {
     this.responseHandler = onResponse
-    // fs.writeFile('data/output.wav', this.mediaStreamConverter.generateWavHeader(), () => { });
-    this.genAiService = new GenAiService()
-    this.vadProcessor = new VADProcessor();
+    let id = generateRandomText(10)
 
-    // let userInputFilename = generarCadenaAleatoria(40) + '.wav'
-    // let fileAppender = new FileAppender('data/' + userInputFilename);
-    let stsPipe: SpeechToTextService
+    let stt: SpeechToTextService
 
-    this.mediaStreamConverter = new MediaStreamConverter({
-      mediaFormat,
-      onData: (data) => {
-        // fileAppender.append(data);
-        // return
-        const pcmData = new Int16Array(data.buffer);
-        const isSpeaking = this.vadProcessor.processAudio(pcmData, 8000);
+    let i = 1;
+    let fileAppender: FileAppender
+    let vadProcessor = new VADProcessor({
+      sampleRate: mediaFormat.sampleRate,
+      onSpeechStarted: () => {
+        const filename = `data/${id}_${generateRandomText(30)}_${i}`
+        console.log("El cliente dice: ", filename)
+        fileAppender = new FileAppender(filename + '.wav')
+        fileAppender.append(generateWavHeader(mediaFormat.sampleRate))
 
-        if (isSpeaking) {
+        let genAiService = new GenAiService()
+        stt = new SpeechToTextService(async (transcript) => {
+          console.log("Speech to text", filename, transcript)
+          if (transcript === '') return
+          let startsAt
+          startsAt = Date.now()
+          const textResponse = await genAiService.generateResponse(transcript)
+          console.log("Text response", filename, textResponse, "Duration", (Date.now() - startsAt) / 1000)
 
-          this.startSpeakingHandler?.()
+          startsAt = Date.now()
+          const textToSpeechService = new TextToSpeechService()
+          const speechResponse = await textToSpeechService.send(textResponse)
+          console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
+          fs.writeFile(filename + '.mp3', speechResponse, () => { })
 
-          // If we pass threshold, process buffered chunks
-          if (!this.userIsSpeaking) {
-            this.userIsSpeaking = true;
-            stsPipe = this._prepareSpeechToSpeechPipe()
-            // Process buffered chunks
-            data = Buffer.concat([
-              this.voiceBuffer?.chunks ?? Buffer.alloc(0),
-              data
-            ]);
-            // Discard buffer if voice stopped before threshold
-            this.voiceBuffer = null;
-            // fileAppender.append(mergedChunks);
-          }
-          stsPipe.write(data);
-
-        } else {
-          if (!this.voiceBuffer) {
-            this.voiceBuffer = {
-              chunks: Buffer.alloc(0),
-              totalDuration: 0
-            };
-          }
-
-          this.voiceBuffer.chunks = Buffer.concat([this.voiceBuffer.chunks, data]);
-          const voiceBufferLength = this.voiceBuffer.chunks.length / 16 // ms
-          if (voiceBufferLength > 500) {
-            this.voiceBuffer.chunks = this.voiceBuffer.chunks.subarray(this.voiceBuffer.chunks.length - 500 * 16)
-          }
-
-          if (this.userIsSpeaking) {
-            this.userIsSpeaking = false;
-            this.voiceBuffer = null;
-            stsPipe.end();
-
-            // userInputFilename = generarCadenaAleatoria(40) + '.wav'
-            // fileAppender = new FileAppender('data/' + userInputFilename);
-            // fileAppender.append(this.mediaStreamConverter.generateWavHeader());
-            // this.mediaStreamConverter.end();
-            // this.mediaStreamConverter = this._prepareSpeechToSpeechPipe();
-          }
-        }
+          this.responseHandler(speechResponse)
+        })
       },
-      onClose: () => {
-        // console.log("Client says", userInputFilename)
+      onSpeechReceived(audioData) {
+        fileAppender.append(audioData)
+
+        stt.write(audioData)
+      },
+      onSpeechEnded() {
+        stt.end()
+        i++
       }
     })
 
-    // fileAppender.append(this.mediaStreamConverter.generateWavHeader());
 
+    this.mediaStreamConverter = new MediaStreamConverter({
+      sessionId: id,
+      mediaFormat,
+      onData: async (data) => {
+        vadProcessor.processAudio(data)
+      },
+      onClose: () => {
+        stt.end()
+      }
+    })
   }
 
   onUserStartsSpeaking(handler: () => void) {
     this.startSpeakingHandler = handler
   }
 
-  private _prepareSpeechToSpeechPipe() {
-    return new SpeechToTextService(async (transcript) => {
-      try {
-        console.log("Speech to text", transcript)
-        if (transcript === '') return
-        let startsAt
-        startsAt = Date.now()
-        const textResponse = await this.genAiService.generateResponse(transcript)
-        console.log("Text response", textResponse, "Duration", (Date.now() - startsAt) / 1000)
+  // private _prepareSpeechToSpeechPipe() {
+  //   return new SpeechToTextService(async (transcript) => {
+  //     try {
+  //       console.log("Speech to text", transcript)
+  //       if (transcript === '') return
+  //       let startsAt
+  //       startsAt = Date.now()
+  //       const textResponse = await this.genAiService.generateResponse(transcript)
+  //       console.log("Text response", textResponse, "Duration", (Date.now() - startsAt) / 1000)
 
-        startsAt = Date.now()
-        const textToSpeechService = new TextToSpeechService()
-        const speechResponse = await textToSpeechService.send(textResponse)
-        const filename = generarCadenaAleatoria(40) + '.mp3';
-        console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
-        fs.writeFile('data/' + filename, speechResponse, () => { })
+  //       startsAt = Date.now()
+  //       const textToSpeechService = new TextToSpeechService()
+  //       const speechResponse = await textToSpeechService.send(textResponse)
+  //       const filename = generarCadenaAleatoria(40) + '.mp3';
+  //       console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
+  //       fs.writeFile('data/' + filename, speechResponse, () => { })
 
-        this.responseHandler(speechResponse)
-      }
-      catch (e: any) {
-        console.log("Error en la conversación", e.message)
-      }
-    })
-  }
+  //       this.responseHandler(speechResponse)
+  //     }
+  //     catch (e: any) {
+  //       console.log("Error en la conversación", e.message)
+  //     }
+  //   })
+  // }
 
   write(stream: Buffer, timestamp: number) {
     this.mediaStreamConverter.write(stream);
   }
 
-  async text(text: string) {
-    console.log("Text", text)
-    let startsAt
+  // async text(text: string) {
+  //   console.log("Text", text)
+  //   let startsAt
 
-    try {
-      startsAt = Date.now()
-      const textResponse = await this.genAiService.generateResponse(text)
-      console.log("Text response", textResponse, "Duration", (Date.now() - startsAt) / 1000)
+  //   try {
+  //     startsAt = Date.now()
+  //     const textResponse = await this.genAiService.generateResponse(text)
+  //     console.log("Text response", textResponse, "Duration", (Date.now() - startsAt) / 1000)
 
-      startsAt = Date.now()
-      const textToSpeechService = new TextToSpeechService()
-      const speechResponse = await textToSpeechService.send(textResponse)
-      const filename = generarCadenaAleatoria(40) + '.mp3';
-      console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
-      fs.writeFile('data/' + filename, speechResponse, () => { })
+  //     startsAt = Date.now()
+  //     const textToSpeechService = new TextToSpeechService()
+  //     const speechResponse = await textToSpeechService.send(textResponse)
+  //     const filename = generarCadenaAleatoria(40) + '.mp3';
+  //     console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
+  //     fs.writeFile('data/' + filename, speechResponse, () => { })
 
-      this.responseHandler(speechResponse)
-    } catch (e) {
+  //     this.responseHandler(speechResponse)
+  //   } catch (e) {
 
-    }
-  }
+  //   }
+  // }
 }

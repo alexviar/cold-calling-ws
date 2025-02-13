@@ -1,6 +1,10 @@
 # Usa una imagen base de Node.js optimizada para producción
 FROM node:20-alpine AS builder
 
+# Instala las dependencias de compilación necesarias
+RUN apk add --no-cache python3 make g++ \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
@@ -35,3 +39,4 @@ EXPOSE 3000
 
 # Comando para ejecutar la aplicación
 CMD ["node", "dist/index.js"]
+
