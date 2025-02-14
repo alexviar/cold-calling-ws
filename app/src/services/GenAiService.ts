@@ -28,11 +28,7 @@ export class GenAiService {
   private pendingRequest!: Promise<string>;
   private finalizeRequest!: (text: string) => void;
 
-  constructor() {
-    this.initialize()
-  }
-
-  private initialize() {
+  initialize() {
     this.pendingRequest = new Promise((resolve, reject) => {
       const url = new URL('https://generativelanguage.googleapis.com');
       url.pathname = '/v1beta/models/gemini-1.5-flash:generateContent';
@@ -56,7 +52,6 @@ export class GenAiService {
           const response = JSON.parse(data);
           const content = response.candidates[0].content;
           this.history.push(content);
-          this.initialize()
           resolve(content.parts[0].text);
         });
       });

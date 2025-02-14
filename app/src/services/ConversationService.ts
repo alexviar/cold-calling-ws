@@ -24,6 +24,7 @@ export class ConversationService {
     this.responseHandler = onResponse
     let id = generateRandomText(10)
 
+    let genAiService = new GenAiService()
     let stt: SpeechToTextService
 
     let i = 1;
@@ -36,7 +37,7 @@ export class ConversationService {
         fileAppender = new FileAppender(filename + '.wav')
         fileAppender.append(generateWavHeader(mediaFormat.sampleRate))
 
-        let genAiService = new GenAiService()
+        genAiService.initialize()
         stt = new SpeechToTextService(async (transcript) => {
           console.log("Speech to text", filename, transcript)
           if (transcript === '') return
@@ -82,32 +83,7 @@ export class ConversationService {
     this.startSpeakingHandler = handler
   }
 
-  // private _prepareSpeechToSpeechPipe() {
-  //   return new SpeechToTextService(async (transcript) => {
-  //     try {
-  //       console.log("Speech to text", transcript)
-  //       if (transcript === '') return
-  //       let startsAt
-  //       startsAt = Date.now()
-  //       const textResponse = await this.genAiService.generateResponse(transcript)
-  //       console.log("Text response", textResponse, "Duration", (Date.now() - startsAt) / 1000)
-
-  //       startsAt = Date.now()
-  //       const textToSpeechService = new TextToSpeechService()
-  //       const speechResponse = await textToSpeechService.send(textResponse)
-  //       const filename = generarCadenaAleatoria(40) + '.mp3';
-  //       console.log("Text to speech", filename, "Duration", (Date.now() - startsAt) / 1000)
-  //       fs.writeFile('data/' + filename, speechResponse, () => { })
-
-  //       this.responseHandler(speechResponse)
-  //     }
-  //     catch (e: any) {
-  //       console.log("Error en la conversación", e.message)
-  //     }
-  //   })
-  // }
-
-  write(stream: Buffer, timestamp: number) {
+  write(stream: Buffer) {
     this.mediaStreamConverter.write(stream);
   }
 
