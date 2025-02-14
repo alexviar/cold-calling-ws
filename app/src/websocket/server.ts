@@ -5,6 +5,8 @@ import WebSocket, { WebSocketServer } from 'ws';
 import { ConversationService } from '../services/ConversationService';
 import path from 'path';
 import { AudioCodec } from '../services/MediaStreamConverter';
+import { systemInstruction, textData } from '../services/textData';
+import { Agent } from '../services/Agent';
 
 const codecMap: Record<string, AudioCodec> = {
   'g729': 'g729',
@@ -18,8 +20,27 @@ function websocketServer(server: HTTPServer): void {
 
   wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
     console.log('Cliente conectado', parse(req.url || '', true).query);
+    const urlParams = parse(req.url || '', true).query
+    const campaign_id = urlParams['campaign_id']
 
-    let conversationService
+    let campaign: any = null;
+    console.log(`${process.env.API_URL}/campaigns/${campaign_id}`)
+    let pendingTask = fetch(`${process.env.API_URL}/campaigns/${campaign_id}`, {
+      headers: {
+        'Accept': 'application/json',
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        campaign = data
+        console.log(campaign)
+      })
+    // .catch(error => {
+    //   console.error('Error fetching campaign:', error);
+    //   ws.close()
+    // })
+
+    let conversationService: Agent
 
     try {
       const greetingsPath = path.join(__dirname, '..', 'assets', 'greetings.mp3');
@@ -34,7 +55,6 @@ function websocketServer(server: HTTPServer): void {
       console.error('Error loading greetings.mp3:', error);
       console.log('Attempted path:', path.join(__dirname, '..', 'assets', 'greetings.mp3'));
     }
-    // conversationService.text("hola, ¿Con quién hablo?")
 
     ws.on('open', () => {
       console.log('Conection open')
@@ -42,38 +62,41 @@ function websocketServer(server: HTTPServer): void {
 
     // Escucha mensajes del cliente
     ws.on('message', (message: string) => {
-      console.log("Message receibed", String(message))
+      // console.log("Message receibed", String(message))
+      pendingTask = pendingTask.then(() => {
 
-      const event = JSON.parse(message);
-      if (event.event == 'start') {
-        const { channels, encoding, sample_rate } = event.start.media_format
-        conversationService = new ConversationService({
-          mediaFormat: { numChannels: channels, encoding: codecMap[(encoding as string).toLowerCase()], sampleRate: sample_rate },
-          onResponse: (payload: Buffer) => {
+        const event = JSON.parse(message);
+        if (event.event == 'start') {
+          const { channels, encoding, sample_rate } = event.start.media_format
+          conversationService = new Agent(
+            event.stream_id,
+            campaign.prompt,
+            {
+              mimeType: 'text/plain',
+              data: Buffer.from(campaign.information)
+            },
+            { numChannels: channels, encoding: codecMap[(encoding as string).toLowerCase()], sampleRate: sample_rate },
+          )
+          conversationService.onResponse((payload: Buffer) => {
             ws.send(JSON.stringify({
               event: 'media',
               media: {
                 payload: payload.toString('base64')
               }
             }))
+          })
+        } else if (event.event == 'media') {
+          if (event.media.payload == 'QQA=') {
+            console.log('Skipping QQA= Media payload')
+            return;
           }
-        })
-        conversationService.onUserStartsSpeaking(() => {
-          // ws.send(JSON.stringify({
-          //   event: 'clear',
-          // }))
-        })
-      } else if (event.event == 'media') {
-        if (event.media.payload == 'QQA=') {
-          console.log('Skipping QQA= Media payload')
-          return;
+          const buffer = Buffer.from(event.media.payload, 'base64');
+          conversationService!.writeAudioStream(buffer);
         }
-        const buffer = Buffer.from(event.media.payload, 'base64');
-        conversationService!.write(buffer, Number(event.media.timestamp));
-      }
-      else if (event.event == 'stop') {
-        // mediaCoverter.end();
-      }
+        else if (event.event == 'stop') {
+          // mediaCoverter.end();
+        }
+      })
     });
 
     // Maneja la desconexión del cliente
